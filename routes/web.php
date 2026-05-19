@@ -24,6 +24,7 @@ Route::get('/', function () {
         'canRegister' => false,
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
+        'auth' => auth()->check() ? ['user' => auth()->user()] : null,
     ]);
 });
 

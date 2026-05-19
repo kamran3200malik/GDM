@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             ProvinceSeeder::class,
             DistrictSeeder::class,
+            TehseelSeeder::class,
             RankSeeder::class,
             ReligionSeeder::class,
         ]);

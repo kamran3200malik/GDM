@@ -1,6 +1,13 @@
 <script setup>
 import { computed, ref } from 'vue';
 
+const props = defineProps({
+    auth: {
+        type: Object,
+        default: null,
+    },
+});
+
 const mobileMenuOpen = ref(false);
 
 const navItems = computed(() => [
@@ -11,7 +18,7 @@ const navItems = computed(() => [
     { label: 'Facilities', href: '#facilities' },
     { label: 'Gallery', href: '#gallery' },
     { label: 'Contact', href: '#contact' },
-    { label: 'Login', href: '/login' },
+    { label: props.auth ? 'Dashboard' : 'Login', href: props.auth ? '/dashboard' : '/login' },
 ]);
 
 const appTitle = computed(() => 'GDM School');

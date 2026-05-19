@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class Student extends Model
 {
@@ -18,56 +21,22 @@ class Student extends Model
         'mother_name',
         'dob',
         'gender',
-        'bloodgroup',
-        'unit_id',
-        'admission_type',
         'class',
-        'pak_no',
-        'trade_id',
-        'section_id',
-        'religion_id',
-        'rank_id',
-        'admission_class',
-        'admission_section_id',
-        'office_phone',
-        'whatsapp_no',
-        'mobile_no',
-        'address',
-        'category',
-        'admission_date',
-        'student_group',
-        'using_van',
         'place_of_birth',
-        'admission_year',
-        'directress',
-        'reason',
-        'devices_health_issues',
-        'note',
+        'image',
+        'nationality',
+        'religion',
+        'bloodgroup',
         'polio_vaccination',
-        'grandparents_alive',
-        'prospectus_issued',
-        'date_left',
-        'slc_no',
-        'stu_image',
-        'card_generated_date',
         'is_active',
     ];
 
     protected $casts = [
         'dob' => 'date',
-        'admission_date' => 'date',
-        'date_left' => 'date',
-        'card_generated_date' => 'date',
-        'using_van' => 'boolean',
-        'devices_health_issues' => 'boolean',
-        'polio_vaccination' => 'boolean',
-        'grandparents_alive' => 'boolean',
-        'prospectus_issued' => 'boolean',
         'is_active' => 'boolean',
-        'bloodgroup' => 'string',
-        'admission_type' => 'string',
         'class' => 'string',
-        'admission_class' => 'string',
+        'bloodgroup' => 'string',
+        'polio_vaccination' => 'boolean',
     ];
 
     public function user(): BelongsTo
@@ -75,34 +44,50 @@ class Student extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function unit(): BelongsTo
+
+    public function addresses(): MorphMany
     {
-        return $this->belongsTo(Unit::class);
+        return $this->morphMany(Address::class, 'addressable');
     }
 
-    public function rank(): BelongsTo
+    public function currentAddress()
     {
-        return $this->belongsTo(Rank::class);
+        return $this->morphOne(Address::class, 'addressable')->where('address_type', 'current');
     }
 
-    public function trade(): BelongsTo
+    public function permanentAddress()
     {
-        return $this->belongsTo(Trade::class);
+        return $this->morphOne(Address::class, 'addressable')->where('address_type', 'permanent');
     }
 
-    public function section(): BelongsTo
+    public function contacts(): MorphMany
     {
-        return $this->belongsTo(Section::class);
+        return $this->morphMany(Contact::class, 'contactable');
     }
 
-    public function religion(): BelongsTo
+    public function primaryContact()
     {
-        return $this->belongsTo(Religion::class);
+        return $this->morphOne(Contact::class, 'contactable')->where('is_primary', true);
     }
 
-    public function admissionSection(): BelongsTo
+    public function admissionDetail(): HasOne
     {
-        return $this->belongsTo(Section::class, 'admission_section_id');
+        return $this->hasOne(StudentAdmissionDetail::class);
+    }
+
+    public function transport(): HasOne
+    {
+        return $this->hasOne(StudentTransport::class);
+    }
+
+    public function leavingDetail(): HasOne
+    {
+        return $this->hasOne(StudentLeavingDetail::class);
+    }
+
+    public function guardianDetail(): MorphOne
+    {
+        return $this->morphOne(GuardianDetail::class, 'personalable');
     }
 
     public function getFullNameAttribute(): string
