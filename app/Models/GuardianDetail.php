@@ -11,6 +11,8 @@ class GuardianDetail extends Model
 {
     use HasFactory;
 
+    protected $table = 'gaurdian_details';
+
     protected $fillable = [
         'personalable_id',
         'personalable_type',
@@ -19,8 +21,7 @@ class GuardianDetail extends Model
         'cnic_number',
         'unit_id',
         'trade_id',
-        'section_id',
-        'religion_id',
+        'section',
         'rank_id',
     ];
 
@@ -43,15 +44,6 @@ class GuardianDetail extends Model
         return $this->belongsTo(Trade::class);
     }
 
-    public function section(): BelongsTo
-    {
-        return $this->belongsTo(Section::class);
-    }
-
-    public function religion(): BelongsTo
-    {
-        return $this->belongsTo(Religion::class);
-    }
 
     public function rank(): BelongsTo
     {

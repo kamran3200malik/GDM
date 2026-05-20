@@ -29,11 +29,11 @@ const filteredAdmissionSections = computed(() => {
 
 // Computed property for filtered current sections
 const filteredCurrentSections = computed(() => {
-    if (!form.class) {
+    if (!form.current_class) {
         return props.sections;
     }
     // Convert title case to lowercase for database comparison
-    const classType = form.class.toLowerCase();
+    const classType = form.current_class.toLowerCase();
     return props.sections.filter(section => section.class_type === classType);
 });
 
@@ -45,7 +45,8 @@ const form = useForm({
     mother_name: '',
     dob: '',
     gender: '',
-    class: '',
+    current_class: '',
+    current_section_id: '',
     place_of_birth_tehseel_id: '',
     image: '',
     religion: '',
@@ -53,13 +54,13 @@ const form = useForm({
     polio_vaccination: false,
 
     // Guardian Detail fields
-    category: '',
-    pak_no: '',
-    cnic_number: '',
-    unit_id: '',
-    trade_id: '',
-    section: '',
-    rank_id: '',
+    guardian_category: '',
+    guardian_pak_no: '',
+    guardian_cnic_number: '',
+    guardian_unit_id: '',
+    guardian_trade_id: '',
+    guardian_section: '',
+    guardian_rank_id: '',
 
     // Current Address fields
     current_address: '',
@@ -140,12 +141,12 @@ watch(() => form.admission_class, (newValue) => {
     form.admission_section_id = '';
 });
 
-watch(() => form.class, (newValue) => {
+watch(() => form.current_class, (newValue) => {
     form.current_section_id = '';
 });
 
 // Auto-format guardian CNIC number
-watch(() => form.cnic_number, (newValue) => {
+watch(() => form.guardian_cnic_number, (newValue) => {
     if (!newValue) return;
 
     // Remove all non-digit characters
@@ -168,7 +169,7 @@ watch(() => form.cnic_number, (newValue) => {
         }
     }
 
-    form.cnic_number = formatted;
+    form.guardian_cnic_number = formatted;
 });
 
 const getStepTitle = () => {
@@ -247,6 +248,18 @@ const getStepTitle = () => {
                                 </Link>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                 <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Form Number *</label>
+                                    <input
+                                        v-model="form.form_number"
+                                        type="text"
+                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        :class="{ 'border-red-500': form.errors.form_number }"
+                                        required
+                                    />
+                                    <p v-if="form.errors.form_number" class="mt-1 text-sm text-red-600">{{ form.errors.form_number }}</p>
+                                </div>                 
+                                                                 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Student Name *</label>
                                     <input
@@ -337,17 +350,7 @@ const getStepTitle = () => {
                                     </select>
                                     <p v-if="form.errors.religion" class="mt-1 text-sm text-red-600">{{ form.errors.religion }}</p>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Form Number *</label>
-                                    <input
-                                        v-model="form.form_number"
-                                        type="text"
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.form_number }"
-                                        required
-                                    />
-                                    <p v-if="form.errors.form_number" class="mt-1 text-sm text-red-600">{{ form.errors.form_number }}</p>
-                                </div>
+                               
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Place of Birth (Tehseel)</label>
                                     <select
@@ -457,16 +460,16 @@ const getStepTitle = () => {
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Current Class</label>
                                     <select
-                                        v-model="form.class"
+                                        v-model="form.current_class"
                                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.class }"
+                                        :class="{ 'border-red-500': form.errors.current_class }"
                                     >
                                         <option value="">Select Class</option>
                                         <option value="Junior">Junior</option>
                                         <option value="Senior">Senior</option>
                                         <option value="Advance">Advance</option>
                                     </select>
-                                    <p v-if="form.errors.class" class="mt-1 text-sm text-red-600">{{ form.errors.class }}</p>
+                                    <p v-if="form.errors.current_class" class="mt-1 text-sm text-red-600">{{ form.errors.current_class }}</p>
                                 </div>
                                 
                                
@@ -482,8 +485,8 @@ const getStepTitle = () => {
                                         <option v-for="section in filteredCurrentSections" :key="section.id" :value="section.id">{{ section.name }}</option>
                                     </select>
                                     <p v-if="form.errors.current_section_id" class="mt-1 text-sm text-red-600">{{ form.errors.current_section_id }}</p>
-                                    <p v-if="form.class && filteredCurrentSections.length === 0" class="mt-1 text-sm text-yellow-600">
-                                        No sections available for {{ form.class }} class
+                                    <p v-if="form.current_class && filteredCurrentSections.length === 0" class="mt-1 text-sm text-yellow-600">
+                                        No sections available for {{ form.current_class }} class
                                     </p>
                                 </div>
                                
@@ -552,29 +555,29 @@ const getStepTitle = () => {
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
                                     <select
-                                        v-model="form.category"
+                                        v-model="form.guardian_category"
                                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.category }"
+                                        :class="{ 'border-red-500': form.errors.guardian_category }"
                                     >
                                         <option value="">Select Category</option>
                                         <option value="Officer">Officer</option>
                                         <option value="civilian">Civilian</option>
                                         <option value="CNE">CNE</option>
                                     </select>
-                                    <p v-if="form.errors.category" class="mt-1 text-sm text-red-600">{{ form.errors.category }}</p>
+                                    <p v-if="form.errors.guardian_category" class="mt-1 text-sm text-red-600">{{ form.errors.guardian_category }}</p>
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Unit</label>
                                     <select
-                                        v-model="form.unit_id"
+                                        v-model="form.guardian_unit_id"
                                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.unit_id }"
+                                        :class="{ 'border-red-500': form.errors.guardian_unit_id }"
                                     >
                                         <option value="">Select Unit</option>
                                         <option v-for="unit in props.units" :key="unit.id" :value="unit.id">{{ unit.name }}</option>
                                     </select>
-                                    <p v-if="form.errors.unit_id" class="mt-1 text-sm text-red-600">{{ form.errors.unit_id }}</p>
+                                    <p v-if="form.errors.guardian_unit_id" class="mt-1 text-sm text-red-600">{{ form.errors.guardian_unit_id }}</p>
                                 </div>
 
 
@@ -582,61 +585,61 @@ const getStepTitle = () => {
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Pak Number</label>
                                     <input
-                                        v-model="form.pak_no"
+                                        v-model="form.guardian_pak_no"
                                         type="text"
                                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.pak_no }"
+                                        :class="{ 'border-red-500': form.errors.guardian_pak_no }"
                                     />
-                                    <p v-if="form.errors.pak_no" class="mt-1 text-sm text-red-600">{{ form.errors.pak_no }}</p>
+                                    <p v-if="form.errors.guardian_pak_no" class="mt-1 text-sm text-red-600">{{ form.errors.guardian_pak_no }}</p>
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Rank/Position</label>
                                     <select
-                                        v-model="form.rank_id"
+                                        v-model="form.guardian_rank_id"
                                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.rank_id }"
+                                        :class="{ 'border-red-500': form.errors.guardian_rank_id }"
                                     >
                                         <option value="">Select Rank</option>
                                         <option v-for="rank in props.ranks" :key="rank.id" :value="rank.id">{{ rank.name }}</option>
                                     </select>
-                                    <p v-if="form.errors.rank_id" class="mt-1 text-sm text-red-600">{{ form.errors.rank_id }}</p>
+                                    <p v-if="form.errors.guardian_rank_id" class="mt-1 text-sm text-red-600">{{ form.errors.guardian_rank_id }}</p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Trade/Specialization</label>
                                     <select
-                                        v-model="form.trade_id"
+                                        v-model="form.guardian_trade_id"
                                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.trade_id }"
+                                        :class="{ 'border-red-500': form.errors.guardian_trade_id }"
                                     >
                                         <option value="">Select Trade</option>
                                         <option v-for="trade in props.trades" :key="trade.id" :value="trade.id">{{ trade.name }}</option>
                                     </select>
-                                    <p v-if="form.errors.trade_id" class="mt-1 text-sm text-red-600">{{ form.errors.trade_id }}</p>
+                                    <p v-if="form.errors.guardian_trade_id" class="mt-1 text-sm text-red-600">{{ form.errors.guardian_trade_id }}</p>
                                 </div>
                                                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">CNIC Number</label>
                                     <input
-                                        v-model="form.cnic_number"
+                                        v-model="form.guardian_cnic_number"
                                         type="text"
                                         placeholder="XXXXX-XXXXXXX-X"
                                         maxlength="15"
                                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.cnic_number }"
+                                        :class="{ 'border-red-500': form.errors.guardian_cnic_number }"
                                     />
-                                    <p v-if="form.errors.cnic_number" class="mt-1 text-sm text-red-600">{{ form.errors.cnic_number }}</p>
+                                    <p v-if="form.errors.guardian_cnic_number" class="mt-1 text-sm text-red-600">{{ form.errors.guardian_cnic_number }}</p>
                                 </div>
 
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Section</label>
                                     <input
-                                        v-model="form.section"
+                                        v-model="form.guardian_section"
                                         type="text"
                                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.section }"
+                                        :class="{ 'border-red-500': form.errors.guardian_section }"
                                     />
-                                    <p v-if="form.errors.section" class="mt-1 text-sm text-red-600">{{ form.errors.section }}</p>
+                                    <p v-if="form.errors.guardian_section" class="mt-1 text-sm text-red-600">{{ form.errors.guardian_section }}</p>
                                 </div>
                             </div>
 

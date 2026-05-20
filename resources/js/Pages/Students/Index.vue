@@ -13,9 +13,19 @@ const search = ref(props.filters.search || '');
 const classLevel = ref(props.filters.class_level || '');
 
 const deleteStudent = (student) => {
-    if (confirm(`Are you sure you want to delete ${student.full_name}?`)) {
-        router.delete(route('admin.students.destroy', student.id));
-    }
+    Swal.fire({
+        title: 'Are you sure?',
+        text: `You are about to delete ${student.full_name}`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            router.delete(route('admin.students.destroy', student.id));
+        }
+    });
 };
 
 watch([search, classLevel], () => {
@@ -60,9 +70,9 @@ const getStatusColor = (isActive) => {
                                 class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             >
                                 <option value="">All Classes</option>
-                                <option value="junior">Junior</option>
-                                <option value="senior">Senior</option>
-                                <option value="advance">Advance</option>
+                                <option value="Junior">Junior</option>
+                                <option value="Senior">Senior</option>
+                                <option value="Advance">Advance</option>
                             </select>
                         </div>
                         <div class="flex items-end space-x-3">
@@ -88,19 +98,25 @@ const getStatusColor = (isActive) => {
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Student ID
+                                    Image
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Form#
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Name
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Email
+                                    Father
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Grade
+                                    Category
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Status
+                                    Current Class
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Van
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Actions
@@ -109,26 +125,34 @@ const getStatusColor = (isActive) => {
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             <tr v-for="student in students.data" :key="student.id">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div v-if="student.image" class="w-10 h-10 rounded-full overflow-hidden">
+                                        <img :src="'/storage/' + student.image" alt="Student Image" class="w-full h-full object-cover" />
+                                    </div>
+                                    <div v-else class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                        </svg>
+                                    </div>
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                     {{ student.student_id }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">
-                                        {{ student.full_name }}
-                                    </div>
-                                    <div class="text-sm text-gray-500">
-                                        {{ student.phone || 'No phone' }}
-                                    </div>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{ student.full_name }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ student.user.email }}
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{ student.father_name || 'Not provided' }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ student.class_level }}{{ student.section ? ' - ' + student.section : '' }}
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 capitalize">
+                                    {{ student.category || 'Not provided' }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span :class="`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(student.is_active)}`">
-                                        {{ student.is_active ? 'Active' : 'Inactive' }}
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{ student.class_level || 'Not assigned' }}{{ student.section ? ' - ' + student.section : '' }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <span :class="student.using_van ? 'text-green-600' : 'text-gray-400'">
+                                        {{ student.using_van ? 'Yes' : 'No' }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">

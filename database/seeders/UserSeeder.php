@@ -43,7 +43,7 @@ class UserSeeder extends Seeder
             'name' => 'John Teacher',
             'email' => 'teacher@school.com',
             'service_number' => '4310',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('11223344'),
             'role_id' => $teacherRole->id,
         ]);
     }

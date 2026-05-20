@@ -21,11 +21,12 @@ class Student extends Model
         'mother_name',
         'dob',
         'gender',
-        'class',
-        'place_of_birth',
+        'current_class',
+        'current_section_id',
+        'place_of_birth_tehseel_id',
         'image',
-        'nationality',
         'religion',
+        'religion_id',
         'bloodgroup',
         'polio_vaccination',
         'is_active',
@@ -34,7 +35,7 @@ class Student extends Model
     protected $casts = [
         'dob' => 'date',
         'is_active' => 'boolean',
-        'class' => 'string',
+        'current_class' => 'string',
         'bloodgroup' => 'string',
         'polio_vaccination' => 'boolean',
     ];
@@ -44,6 +45,20 @@ class Student extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function currentSection(): BelongsTo
+    {
+        return $this->belongsTo(Section::class, 'current_section_id');
+    }
+
+    public function placeOfBirthTehseel(): BelongsTo
+    {
+        return $this->belongsTo(Tehseel::class, 'place_of_birth_tehseel_id');
+    }
+
+    public function religionDetail(): BelongsTo
+    {
+        return $this->belongsTo(Religion::class, 'religion_id');
+    }
 
     public function addresses(): MorphMany
     {

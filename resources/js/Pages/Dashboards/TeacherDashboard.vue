@@ -1,5 +1,5 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import TeacherLayout from '@/Layouts/TeacherLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { usePage } from '@inertiajs/vue3';
 
@@ -10,20 +10,25 @@ const auth = props.auth;
 <template>
     <Head title="Teacher Dashboard" />
 
-    <AuthenticatedLayout>
+    <TeacherLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-green-600">
-                Teacher Dashboard
-            </h2>
+            Teacher Dashboard
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl">
                 <!-- Welcome Section -->
                 <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-lg p-6 mb-8">
-                    <div class="text-white">
-                        <h1 class="text-3xl font-bold mb-2">Welcome, {{ auth.user.name }}!</h1>
-                        <p class="text-green-100">Classroom Management Dashboard - Teacher Access</p>
+                    <div class="flex items-center text-white">
+                        <img 
+                            :src="auth.user.avatar_url" 
+                            :alt="auth.user.name"
+                            class="w-16 h-16 rounded-full object-cover mr-4 border-4 border-white/30 shadow-lg"
+                            @error="$event.target.style.display='none'"
+                        />
+                        <div>
+                            <h1 class="text-3xl font-bold mb-2">Welcome, {{ auth.user.name }}!</h1>
+                            <p class="text-green-100">Classroom Management Dashboard - Teacher Access</p>
+                        </div>
                     </div>
                 </div>
 
@@ -220,7 +225,6 @@ const auth = props.auth;
                         </div>
                     </div>
                 </div>
-            </div>
         </div>
-    </AuthenticatedLayout>
+    </TeacherLayout>
 </template>
