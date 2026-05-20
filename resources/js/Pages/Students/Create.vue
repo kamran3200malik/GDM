@@ -9,6 +9,9 @@ const props = defineProps({
     trades: Array,
     sections: Array,
     religions: Array,
+    provinces: Array,
+    districts: Array,
+    tehseels: Array,
 });
 
 const currentStep = ref(1);
@@ -26,52 +29,82 @@ const filteredAdmissionSections = computed(() => {
 
 // Computed property for filtered current sections
 const filteredCurrentSections = computed(() => {
-    if (!form.class) {
+    if (!form.current_class) {
         return props.sections;
     }
     // Convert title case to lowercase for database comparison
-    const classType = form.class.toLowerCase();
+    const classType = form.current_class.toLowerCase();
     return props.sections.filter(section => section.class_type === classType);
 });
 
 const form = useForm({
+    // Student core fields
+    form_number: '',
     student_name: '',
     father_name: '',
     mother_name: '',
     dob: '',
     gender: '',
+    current_class: '',
+    current_section_id: '',
+    place_of_birth_tehseel_id: '',
+    image: '',
+    religion: '',
     bloodgroup: '',
-    place_of_birth: '',
-    stu_image: '',
-    admission_type: '',
-    class: '',
-    pak_no: '',
-    unit_id: '',
-    trade_id: '',
-    section_id: '',
-    religion_id: '',
-    rank_id: '',
-    admission_class: '',
-    admission_section_id: '',
+    polio_vaccination: false,
+
+    // Guardian Detail fields
+    guardian_category: '',
+    guardian_pak_no: '',
+    guardian_cnic_number: '',
+    guardian_unit_id: '',
+    guardian_trade_id: '',
+    guardian_section: '',
+    guardian_rank_id: '',
+
+    // Current Address fields
+    current_address: '',
+    current_city: '',
+    current_district_id: '',
+    current_tehseel_id: '',
+    current_province_id: '',
+    current_postal_code: '',
+    current_colony: 'AMF',
+
+    // Permanent Address fields
+    permanent_address: '',
+    permanent_city: '',
+    permanent_district_id: '',
+    permanent_tehseel_id: '',
+    permanent_province_id: '',
+    permanent_postal_code: '',
+    permanent_colony: 'AMF',
+
+    // Contact fields
     office_phone: '',
     whatsapp_no: '',
     mobile_no: '',
-    address: '',
-    category: '',
+    emergency_contact: '',
+    emergency_contact_relation: '',
+
+    // Admission Detail fields
     admission_date: '',
-    cnic_number: '',
-    using_van: false,
     admission_year: '',
-    directress: '',
-    reason: '',
-    devices_health_issues: false,
-    note: '',
-    polio_vaccination: false,
-    grandparents_alive: true,
+    admission_type: '',
+    admission_class: '',
+    admission_section_id: '',
+    current_admission_date: '',
     prospectus_issued: false,
-    date_left: '',
-    slc_no: '',
     card_generated_date: '',
+    previous_school: '',
+    admission_notes: '',
+
+    // Transport fields
+    using_van: false,
+    van_route: '',
+    van_driver_name: '',
+    van_driver_phone: '',
+    transport_fee: '',
 });
 
 const submit = () => {
@@ -90,8 +123,8 @@ const previousStep = () => {
 
 const handleImageUpload = (event) => {
     const file = event.target.files[0];
-    form.stu_image = file;
-    
+    form.image = file;
+
     if (file) {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -108,22 +141,22 @@ watch(() => form.admission_class, (newValue) => {
     form.admission_section_id = '';
 });
 
-watch(() => form.class, (newValue) => {
-    form.section_id = '';
+watch(() => form.current_class, (newValue) => {
+    form.current_section_id = '';
 });
 
-// Auto-format CNIC number
-watch(() => form.cnic_number, (newValue) => {
+// Auto-format guardian CNIC number
+watch(() => form.guardian_cnic_number, (newValue) => {
     if (!newValue) return;
-    
+
     // Remove all non-digit characters
     let cleaned = newValue.replace(/\D/g, '');
-    
+
     // Limit to 13 digits (5 + 7 + 1)
     if (cleaned.length > 13) {
         cleaned = cleaned.substring(0, 13);
     }
-    
+
     // Format as XXXXX-XXXXXXX-X
     let formatted = '';
     if (cleaned.length > 0) {
@@ -135,18 +168,18 @@ watch(() => form.cnic_number, (newValue) => {
             }
         }
     }
-    
-    form.cnic_number = formatted;
+
+    form.guardian_cnic_number = formatted;
 });
 
 const getStepTitle = () => {
     switch(currentStep.value) {
-        case 1: return 'Basic Information';
+        case 1: return 'Student Information';
         case 2: return 'Academic Information';
         case 3: return 'Father Information';
-        case 4: return 'Contact & Medical';
+        case 4: return 'Contact Information';
         case 5: return 'Review & Submit';
-        default: return 'Basic Information';
+        default: return 'Student Information';
     }
 };
 </script>
@@ -169,7 +202,7 @@ const getStepTitle = () => {
                                 <div class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-500 text-white text-sm font-medium">
                                     1
                                 </div>
-                                <div class="ml-2 text-sm font-medium text-gray-900">Basic Information</div>
+                                <div class="ml-2 text-sm font-medium text-gray-900">Student Information</div>
                             </div>
                             <div class="flex-1 h-px bg-gray-300 mx-4"></div>
                             <div class="flex items-center">
@@ -190,7 +223,7 @@ const getStepTitle = () => {
                                 <div class="flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium" :class="currentStep >= 4 ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-500'">
                                     4
                                 </div>
-                                <div class="ml-2 text-sm font-medium" :class="currentStep >= 4 ? 'text-gray-900' : 'text-gray-500'">Contact & Medical</div>
+                                <div class="ml-2 text-sm font-medium" :class="currentStep >= 4 ? 'text-gray-900' : 'text-gray-500'">Contact Information</div>
                             </div>
                             <div class="flex-1 h-px bg-gray-300 mx-4"></div>
                             <div class="flex items-center">
@@ -203,10 +236,10 @@ const getStepTitle = () => {
                     </div>
 
                     <form @submit.prevent="currentStep === 5 ? submit() : saveAndNext()">
-                        <!-- Step 1: Basic Information -->
+                        <!-- Step 1: Student Information -->
                         <div v-if="currentStep === 1" class="mb-8">
                             <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-lg font-semibold text-gray-900">Basic Information</h3>
+                                <h3 class="text-lg font-semibold text-gray-900">Student Information</h3>
                                 <Link
                                     :href="route('admin.students.index')"
                                     class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
@@ -215,6 +248,18 @@ const getStepTitle = () => {
                                 </Link>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                 <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Form Number *</label>
+                                    <input
+                                        v-model="form.form_number"
+                                        type="text"
+                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        :class="{ 'border-red-500': form.errors.form_number }"
+                                        required
+                                    />
+                                    <p v-if="form.errors.form_number" class="mt-1 text-sm text-red-600">{{ form.errors.form_number }}</p>
+                                </div>                 
+                                                                 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Student Name *</label>
                                     <input
@@ -294,14 +339,29 @@ const getStepTitle = () => {
                                     <p v-if="form.errors.bloodgroup" class="mt-1 text-sm text-red-600">{{ form.errors.bloodgroup }}</p>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Place of Birth</label>
-                                    <input
-                                        v-model="form.place_of_birth"
-                                        type="text"
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Religion</label>
+                                    <select
+                                        v-model="form.religion"
                                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.place_of_birth }"
-                                    />
-                                    <p v-if="form.errors.place_of_birth" class="mt-1 text-sm text-red-600">{{ form.errors.place_of_birth }}</p>
+                                        :class="{ 'border-red-500': form.errors.religion }"
+                                    >
+                                        <option value="">Select Religion</option>
+                                        <option v-for="religion in props.religions" :key="religion.id" :value="religion.name">{{ religion.name }}</option>
+                                    </select>
+                                    <p v-if="form.errors.religion" class="mt-1 text-sm text-red-600">{{ form.errors.religion }}</p>
+                                </div>
+                               
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Place of Birth (Tehseel)</label>
+                                    <select
+                                        v-model="form.place_of_birth_tehseel_id"
+                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        :class="{ 'border-red-500': form.errors.place_of_birth_tehseel_id }"
+                                    >
+                                        <option value="">Select Tehseel</option>
+                                        <option v-for="tehseel in props.tehseels" :key="tehseel.id" :value="tehseel.id">{{ tehseel.name }}</option>
+                                    </select>
+                                    <p v-if="form.errors.place_of_birth_tehseel_id" class="mt-1 text-sm text-red-600">{{ form.errors.place_of_birth_tehseel_id }}</p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Student Image</label>
@@ -400,33 +460,33 @@ const getStepTitle = () => {
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Current Class</label>
                                     <select
-                                        v-model="form.class"
+                                        v-model="form.current_class"
                                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.class }"
+                                        :class="{ 'border-red-500': form.errors.current_class }"
                                     >
                                         <option value="">Select Class</option>
                                         <option value="Junior">Junior</option>
                                         <option value="Senior">Senior</option>
                                         <option value="Advance">Advance</option>
                                     </select>
-                                    <p v-if="form.errors.class" class="mt-1 text-sm text-red-600">{{ form.errors.class }}</p>
+                                    <p v-if="form.errors.current_class" class="mt-1 text-sm text-red-600">{{ form.errors.current_class }}</p>
                                 </div>
                                 
                                
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Current Section</label>
                                     <select
-                                        v-model="form.section_id"
+                                        v-model="form.current_section_id"
                                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.section_id }"
-                                        @change="form.section_id = $event.target.value"
+                                        :class="{ 'border-red-500': form.errors.current_section_id }"
+                                        @change="form.current_section_id = $event.target.value"
                                     >
                                         <option value="">Select Section</option>
                                         <option v-for="section in filteredCurrentSections" :key="section.id" :value="section.id">{{ section.name }}</option>
                                     </select>
-                                    <p v-if="form.errors.section_id" class="mt-1 text-sm text-red-600">{{ form.errors.section_id }}</p>
-                                    <p v-if="form.class && filteredCurrentSections.length === 0" class="mt-1 text-sm text-yellow-600">
-                                        No sections available for {{ form.class }} class
+                                    <p v-if="form.errors.current_section_id" class="mt-1 text-sm text-red-600">{{ form.errors.current_section_id }}</p>
+                                    <p v-if="form.current_class && filteredCurrentSections.length === 0" class="mt-1 text-sm text-yellow-600">
+                                        No sections available for {{ form.current_class }} class
                                     </p>
                                 </div>
                                
@@ -454,6 +514,16 @@ const getStepTitle = () => {
                                         :max="new Date().getFullYear() + 1"
                                     />
                                     <p v-if="form.errors.admission_year" class="mt-1 text-sm text-red-600">{{ form.errors.admission_year }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Current Admission Date</label>
+                                    <input
+                                        v-model="form.current_admission_date"
+                                        type="date"
+                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        :class="{ 'border-red-500': form.errors.current_admission_date }"
+                                    />
+                                    <p v-if="form.errors.current_admission_date" class="mt-1 text-sm text-red-600">{{ form.errors.current_admission_date }}</p>
                                 </div>
                             </div>
 
@@ -485,29 +555,29 @@ const getStepTitle = () => {
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
                                     <select
-                                        v-model="form.category"
+                                        v-model="form.guardian_category"
                                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.category }"
+                                        :class="{ 'border-red-500': form.errors.guardian_category }"
                                     >
                                         <option value="">Select Category</option>
                                         <option value="Officer">Officer</option>
                                         <option value="civilian">Civilian</option>
                                         <option value="CNE">CNE</option>
                                     </select>
-                                    <p v-if="form.errors.category" class="mt-1 text-sm text-red-600">{{ form.errors.category }}</p>
+                                    <p v-if="form.errors.guardian_category" class="mt-1 text-sm text-red-600">{{ form.errors.guardian_category }}</p>
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Unit/Grade</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Unit</label>
                                     <select
-                                        v-model="form.unit_id"
+                                        v-model="form.guardian_unit_id"
                                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.unit_id }"
+                                        :class="{ 'border-red-500': form.errors.guardian_unit_id }"
                                     >
                                         <option value="">Select Unit</option>
                                         <option v-for="unit in props.units" :key="unit.id" :value="unit.id">{{ unit.name }}</option>
                                     </select>
-                                    <p v-if="form.errors.unit_id" class="mt-1 text-sm text-red-600">{{ form.errors.unit_id }}</p>
+                                    <p v-if="form.errors.guardian_unit_id" class="mt-1 text-sm text-red-600">{{ form.errors.guardian_unit_id }}</p>
                                 </div>
 
 
@@ -515,77 +585,61 @@ const getStepTitle = () => {
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Pak Number</label>
                                     <input
-                                        v-model="form.pak_no"
+                                        v-model="form.guardian_pak_no"
                                         type="text"
                                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.pak_no }"
+                                        :class="{ 'border-red-500': form.errors.guardian_pak_no }"
                                     />
-                                    <p v-if="form.errors.pak_no" class="mt-1 text-sm text-red-600">{{ form.errors.pak_no }}</p>
+                                    <p v-if="form.errors.guardian_pak_no" class="mt-1 text-sm text-red-600">{{ form.errors.guardian_pak_no }}</p>
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Rank/Position</label>
                                     <select
-                                        v-model="form.rank_id"
+                                        v-model="form.guardian_rank_id"
                                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.rank_id }"
+                                        :class="{ 'border-red-500': form.errors.guardian_rank_id }"
                                     >
                                         <option value="">Select Rank</option>
                                         <option v-for="rank in props.ranks" :key="rank.id" :value="rank.id">{{ rank.name }}</option>
                                     </select>
-                                    <p v-if="form.errors.rank_id" class="mt-1 text-sm text-red-600">{{ form.errors.rank_id }}</p>
+                                    <p v-if="form.errors.guardian_rank_id" class="mt-1 text-sm text-red-600">{{ form.errors.guardian_rank_id }}</p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Trade/Specialization</label>
                                     <select
-                                        v-model="form.trade_id"
+                                        v-model="form.guardian_trade_id"
                                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.trade_id }"
+                                        :class="{ 'border-red-500': form.errors.guardian_trade_id }"
                                     >
                                         <option value="">Select Trade</option>
                                         <option v-for="trade in props.trades" :key="trade.id" :value="trade.id">{{ trade.name }}</option>
                                     </select>
-                                    <p v-if="form.errors.trade_id" class="mt-1 text-sm text-red-600">{{ form.errors.trade_id }}</p>
+                                    <p v-if="form.errors.guardian_trade_id" class="mt-1 text-sm text-red-600">{{ form.errors.guardian_trade_id }}</p>
                                 </div>
                                                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">CNIC Number</label>
                                     <input
-                                        v-model="form.cnic_number"
+                                        v-model="form.guardian_cnic_number"
                                         type="text"
                                         placeholder="XXXXX-XXXXXXX-X"
-                                        pattern="[0-9]{5}-[0-9]{7}-[0-9]{1}"
                                         maxlength="15"
                                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.cnic_number }"
+                                        :class="{ 'border-red-500': form.errors.guardian_cnic_number }"
                                     />
-                                    <p v-if="form.errors.cnic_number" class="mt-1 text-sm text-red-600">{{ form.errors.cnic_number }}</p>
+                                    <p v-if="form.errors.guardian_cnic_number" class="mt-1 text-sm text-red-600">{{ form.errors.guardian_cnic_number }}</p>
                                 </div>
 
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Religion</label>
-                                    <select
-                                        v-model="form.religion_id"
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.religion_id }"
-                                    >
-                                        <option value="">Select Religion</option>
-                                        <option v-for="religion in props.religions" :key="religion.id" :value="religion.id">{{ religion.name }}</option>
-                                    </select>
-                                    <p v-if="form.errors.religion_id" class="mt-1 text-sm text-red-600">{{ form.errors.religion_id }}</p>
-                                </div>
-                                
-
-                              
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Directress (Montessori)</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Section</label>
                                     <input
-                                        v-model="form.directress"
+                                        v-model="form.guardian_section"
                                         type="text"
                                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.directress }"
+                                        :class="{ 'border-red-500': form.errors.guardian_section }"
                                     />
-                                    <p v-if="form.errors.directress" class="mt-1 text-sm text-red-600">{{ form.errors.directress }}</p>
+                                    <p v-if="form.errors.guardian_section" class="mt-1 text-sm text-red-600">{{ form.errors.guardian_section }}</p>
                                 </div>
                             </div>
 
@@ -607,111 +661,224 @@ const getStepTitle = () => {
                             </div>
                         </div>
 
-                        <!-- Step 4: Contact & Medical -->
+                        <!-- Step 4: Contact & Address Information -->
                         <div v-if="currentStep === 4" class="mb-8">
                             <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-lg font-semibold text-gray-900">Contact & Medical Information</h3>
+                                <h3 class="text-lg font-semibold text-gray-900">Contact & Address Information</h3>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Office Phone</label>
-                                    <input
-                                        v-model="form.office_phone"
-                                        type="tel"
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.office_phone }"
-                                    />
-                                    <p v-if="form.errors.office_phone" class="mt-1 text-sm text-red-600">{{ form.errors.office_phone }}</p>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">WhatsApp Number</label>
-                                    <input
-                                        v-model="form.whatsapp_no"
-                                        type="tel"
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.whatsapp_no }"
-                                    />
-                                    <p v-if="form.errors.whatsapp_no" class="mt-1 text-sm text-red-600">{{ form.errors.whatsapp_no }}</p>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
-                                    <input
-                                        v-model="form.mobile_no"
-                                        type="tel"
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.mobile_no }"
-                                    />
-                                    <p v-if="form.errors.mobile_no" class="mt-1 text-sm text-red-600">{{ form.errors.mobile_no }}</p>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                                    <textarea
-                                        v-model="form.address"
-                                        rows="3"
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.address }"
-                                    ></textarea>
-                                    <p v-if="form.errors.address" class="mt-1 text-sm text-red-600">{{ form.errors.address }}</p>
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="flex items-center">
+                            
+                            <!-- Contact Information -->
+                            <div class="mb-6">
+                                <h4 class="text-md font-semibold text-gray-800 mb-3">Contact Information</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Office Phone</label>
                                         <input
-                                            type="checkbox"
-                                            v-model="form.using_van"
-                                            class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            v-model="form.office_phone"
+                                            type="tel"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            :class="{ 'border-red-500': form.errors.office_phone }"
                                         />
-                                        <span class="ml-2 text-sm text-gray-700">Using Van Transport</span>
-                                    </label>
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="flex items-center">
+                                        <p v-if="form.errors.office_phone" class="mt-1 text-sm text-red-600">{{ form.errors.office_phone }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">WhatsApp Number</label>
                                         <input
-                                            type="checkbox"
-                                            v-model="form.devices_health_issues"
-                                            class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            v-model="form.whatsapp_no"
+                                            type="tel"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            :class="{ 'border-red-500': form.errors.whatsapp_no }"
                                         />
-                                        <span class="ml-2 text-sm text-gray-700">Devices/Health Issues</span>
-                                    </label>
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="flex items-center">
+                                        <p v-if="form.errors.whatsapp_no" class="mt-1 text-sm text-red-600">{{ form.errors.whatsapp_no }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
                                         <input
-                                            type="checkbox"
-                                            v-model="form.polio_vaccination"
-                                            class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            v-model="form.mobile_no"
+                                            type="tel"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            :class="{ 'border-red-500': form.errors.mobile_no }"
                                         />
-                                        <span class="ml-2 text-sm text-gray-700">Polio Vaccination</span>
-                                    </label>
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="flex items-center">
+                                        <p v-if="form.errors.mobile_no" class="mt-1 text-sm text-red-600">{{ form.errors.mobile_no }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Emergency Contact</label>
                                         <input
-                                            type="checkbox"
-                                            v-model="form.grandparents_alive"
-                                            class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            v-model="form.emergency_contact"
+                                            type="tel"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            :class="{ 'border-red-500': form.errors.emergency_contact }"
                                         />
-                                        <span class="ml-2 text-sm text-gray-700">Grandparents Alive</span>
-                                    </label>
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="flex items-center">
+                                        <p v-if="form.errors.emergency_contact" class="mt-1 text-sm text-red-600">{{ form.errors.emergency_contact }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Emergency Contact Relation</label>
                                         <input
-                                            type="checkbox"
-                                            v-model="form.prospectus_issued"
-                                            class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            v-model="form.emergency_contact_relation"
+                                            type="text"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            :class="{ 'border-red-500': form.errors.emergency_contact_relation }"
                                         />
-                                        <span class="ml-2 text-sm text-gray-700">Prospectus Issued</span>
-                                    </label>
+                                        <p v-if="form.errors.emergency_contact_relation" class="mt-1 text-sm text-red-600">{{ form.errors.emergency_contact_relation }}</p>
+                                    </div>
                                 </div>
-                                <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                                    <textarea
-                                        v-model="form.note"
-                                        rows="3"
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        :class="{ 'border-red-500': form.errors.note }"
-                                    ></textarea>
-                                    <p v-if="form.errors.note" class="mt-1 text-sm text-red-600">{{ form.errors.note }}</p>
+                            </div>
+
+                            <!-- Permanent Address -->
+                            <div class="mb-6">
+                                <h4 class="text-md font-semibold text-gray-800 mb-3">Permanent Address</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Province</label>
+                                        <select
+                                            v-model="form.permanent_province_id"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            :class="{ 'border-red-500': form.errors.permanent_province_id }"
+                                        >
+                                            <option value="">Select Province</option>
+                                            <option v-for="province in props.provinces" :key="province.id" :value="province.id">{{ province.name }}</option>
+                                        </select>
+                                        <p v-if="form.errors.permanent_province_id" class="mt-1 text-sm text-red-600">{{ form.errors.permanent_province_id }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">District</label>
+                                        <select
+                                            v-model="form.permanent_district_id"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            :class="{ 'border-red-500': form.errors.permanent_district_id }"
+                                        >
+                                            <option value="">Select District</option>
+                                            <option v-for="district in props.districts" :key="district.id" :value="district.id">{{ district.name }}</option>
+                                        </select>
+                                        <p v-if="form.errors.permanent_district_id" class="mt-1 text-sm text-red-600">{{ form.errors.permanent_district_id }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Tehseel</label>
+                                        <select
+                                            v-model="form.permanent_tehseel_id"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            :class="{ 'border-red-500': form.errors.permanent_tehseel_id }"
+                                        >
+                                            <option value="">Select Tehseel</option>
+                                            <option v-for="tehseel in props.tehseels" :key="tehseel.id" :value="tehseel.id">{{ tehseel.name }}</option>
+                                        </select>
+                                        <p v-if="form.errors.permanent_tehseel_id" class="mt-1 text-sm text-red-600">{{ form.errors.permanent_tehseel_id }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Colony</label>
+                                        <select
+                                            v-model="form.permanent_colony"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            :class="{ 'border-red-500': form.errors.permanent_colony }"
+                                        >
+                                            <option value="AMF">AMF</option>
+                                            <option value="MRF">MRF</option>
+                                            <option value="APF">APF</option>
+                                            <option value="ARF">ARF</option>
+                                            <option value="BASE">BASE</option>
+                                            <option value="OTHER">OTHER</option>
+                                        </select>
+                                        <p v-if="form.errors.permanent_colony" class="mt-1 text-sm text-red-600">{{ form.errors.permanent_colony }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                                        <input
+                                            v-model="form.permanent_city"
+                                            type="text"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            :class="{ 'border-red-500': form.errors.permanent_city }"
+                                        />
+                                        <p v-if="form.errors.permanent_city" class="mt-1 text-sm text-red-600">{{ form.errors.permanent_city }}</p>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                                        <textarea
+                                            v-model="form.permanent_address"
+                                            rows="2"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            :class="{ 'border-red-500': form.errors.permanent_address }"
+                                        ></textarea>
+                                        <p v-if="form.errors.permanent_address" class="mt-1 text-sm text-red-600">{{ form.errors.permanent_address }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Current Address -->
+                            <div class="mb-6">
+                                <h4 class="text-md font-semibold text-gray-800 mb-3">Current Address</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Province</label>
+                                        <select
+                                            v-model="form.current_province_id"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            :class="{ 'border-red-500': form.errors.current_province_id }"
+                                        >
+                                            <option value="">Select Province</option>
+                                            <option v-for="province in props.provinces" :key="province.id" :value="province.id">{{ province.name }}</option>
+                                        </select>
+                                        <p v-if="form.errors.current_province_id" class="mt-1 text-sm text-red-600">{{ form.errors.current_province_id }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">District</label>
+                                        <select
+                                            v-model="form.current_district_id"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            :class="{ 'border-red-500': form.errors.current_district_id }"
+                                        >
+                                            <option value="">Select District</option>
+                                            <option v-for="district in props.districts" :key="district.id" :value="district.id">{{ district.name }}</option>
+                                        </select>
+                                        <p v-if="form.errors.current_district_id" class="mt-1 text-sm text-red-600">{{ form.errors.current_district_id }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Tehseel</label>
+                                        <select
+                                            v-model="form.current_tehseel_id"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            :class="{ 'border-red-500': form.errors.current_tehseel_id }"
+                                        >
+                                            <option value="">Select Tehseel</option>
+                                            <option v-for="tehseel in props.tehseels" :key="tehseel.id" :value="tehseel.id">{{ tehseel.name }}</option>
+                                        </select>
+                                        <p v-if="form.errors.current_tehseel_id" class="mt-1 text-sm text-red-600">{{ form.errors.current_tehseel_id }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Colony</label>
+                                        <select
+                                            v-model="form.current_colony"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            :class="{ 'border-red-500': form.errors.current_colony }"
+                                        >
+                                            <option value="AMF">AMF</option>
+                                            <option value="MRF">MRF</option>
+                                            <option value="APF">APF</option>
+                                            <option value="ARF">ARF</option>
+                                            <option value="BASE">BASE</option>
+                                            <option value="OTHER">OTHER</option>
+                                        </select>
+                                        <p v-if="form.errors.current_colony" class="mt-1 text-sm text-red-600">{{ form.errors.current_colony }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                                        <input
+                                            v-model="form.current_city"
+                                            type="text"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            :class="{ 'border-red-500': form.errors.current_city }"
+                                        />
+                                        <p v-if="form.errors.current_city" class="mt-1 text-sm text-red-600">{{ form.errors.current_city }}</p>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                                        <textarea
+                                            v-model="form.current_address"
+                                            rows="2"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            :class="{ 'border-red-500': form.errors.current_address }"
+                                        ></textarea>
+                                        <p v-if="form.errors.current_address" class="mt-1 text-sm text-red-600">{{ form.errors.current_address }}</p>
+                                    </div>
                                 </div>
                             </div>
 
@@ -743,6 +910,9 @@ const getStepTitle = () => {
                                 <h4 class="font-semibold text-gray-900 mb-4">Student Information Summary</h4>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div>
+                                        <span class="font-medium">Form Number:</span> {{ form.form_number }}
+                                    </div>
+                                    <div>
                                         <span class="font-medium">Name:</span> {{ form.student_name }}
                                     </div>
                                     <div>
@@ -761,7 +931,7 @@ const getStepTitle = () => {
                                         <span class="font-medium">Blood Group:</span> {{ form.bloodgroup || 'Not specified' }}
                                     </div>
                                     <div>
-                                        <span class="font-medium">Email:</span> {{ form.email }}
+                                        <span class="font-medium">Religion:</span> {{ form.religion || 'Not specified' }}
                                     </div>
                                     <div>
                                         <span class="font-medium">Class:</span> {{ form.class || 'Not specified' }}
@@ -770,7 +940,10 @@ const getStepTitle = () => {
                                         <span class="font-medium">Admission Date:</span> {{ form.admission_date }}
                                     </div>
                                     <div>
-                                        <span class="font-medium">Address:</span> {{ form.address || 'Not specified' }}
+                                        <span class="font-medium">Admission Type:</span> {{ form.admission_type || 'Not specified' }}
+                                    </div>
+                                    <div>
+                                        <span class="font-medium">Current Admission Date:</span> {{ form.current_admission_date || 'Not specified' }}
                                     </div>
                                 </div>
                             </div>

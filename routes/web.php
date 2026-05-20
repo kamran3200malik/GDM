@@ -24,6 +24,7 @@ Route::get('/', function () {
         'canRegister' => false,
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
+        'auth' => auth()->check() ? ['user' => auth()->user()] : null,
     ]);
 });
 
@@ -45,9 +46,8 @@ Route::get('/dashboard', function (Request $request) {
 // Admin specific routes
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-    Route::get('/students', [AdminDashboardController::class, 'getStudents'])->name('students');
     Route::get('/teachers', [AdminDashboardController::class, 'getTeachers'])->name('teachers');
-    
+
     // Student CRUD routes
     Route::resource('students', StudentController::class);
     

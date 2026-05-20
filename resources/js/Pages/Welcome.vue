@@ -25,6 +25,10 @@ defineProps({
         type: String,
         required: true,
     },
+    auth: {
+        type: Object,
+        default: null,
+    },
 });
 </script>
 
@@ -32,7 +36,7 @@ defineProps({
     <Head title="Welcome" />
     <div class="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 text-slate-900">
         <div class="mx-auto max-w-7xl px-6">
-            <Header />
+            <Header :auth="auth" />
             <main>
                 <HeroSection />
                 <AboutSection />
